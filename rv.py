@@ -2,6 +2,7 @@ from kivy.lang import Builder
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.behaviors import FocusBehavior
@@ -68,18 +69,23 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def on_display_object(self, instance,  value):
         if self.old_display is not None:
             self.old_display.unbind(display_name=self.change_display_name)
+            print(self.text)
+            self.text = value.display_name
         
         self.display_object = value
         self.old_display = value
         self.display_object.bind(display_name=self.change_display_name)
 
     def change_display_name(self, instance,  value):
+        print('change display name', self, instance, value)
         self.text = value
 
+    def on_text(self, instance, value):
+        print('on text', self, instance, value)
 
 class RV(RecycleView):
     controller = ObjectProperty(None)
-    selected_value = StringProperty('')
+    selected_value = ObjectProperty(None)
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
 
@@ -96,6 +102,4 @@ class RV(RecycleView):
 
     def selected_nodes_changed(self, instance, value):
         if len(value) == 1:
-            self.selected_value = instance.children[-value[0]+(len(instance.children)-1)].text
-        else:
-            self.selected_value = ''
+            self.selected_value = instance.children[-value[0]+(len(instance.children)-1)].display_object 

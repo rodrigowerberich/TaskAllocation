@@ -142,17 +142,17 @@ class Display(Widget):
 
     def on_object_menu_selected(self, instance, value):
         if self.is_object_selected:
-            if str(self.selected_object.obj_type)+':'+str(self.selected_object.name) == value:
+            if self.selected_object == value:
                 return
             else:   
-                options = [ obj for obj in self.objects if str(obj.obj_type)+':'+str(obj.name) == value]
+                options = [ obj for obj in self.objects if obj == value]
                 if len(options) == 1:
                     self.selected_object = options[0]
                 else:
                     self.selected_object = self.dummy_object
                     self.is_object_selected = False
         else:
-            options = [ obj for obj in self.objects if str(obj.obj_type)+':'+str(obj.name) == value]
+            options = [ obj for obj in self.objects if obj == value]
             if len(options) == 1:
                 self.selected_object = options[0]
                 self.is_object_selected = True
