@@ -69,7 +69,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def on_display_object(self, instance,  value):
         if self.old_display is not None:
             self.old_display.unbind(display_name=self.change_display_name)
-            print(self.text)
             self.text = value.display_name
         
         self.display_object = value
@@ -77,10 +76,11 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         self.display_object.bind(display_name=self.change_display_name)
 
     def change_display_name(self, instance,  value):
-        print('change display name', self, instance, value)
         self.text = value
 
     def on_text(self, instance, value):
+        if self.parent is not None:
+            self.parent.parent.data[self.index]['text'] = value
         print('on text', self, instance, value)
 
 class RV(RecycleView):
