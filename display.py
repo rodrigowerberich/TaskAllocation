@@ -5,6 +5,7 @@ from kivy.properties import NumericProperty, BooleanProperty, ListProperty, Obje
 from kivy.graphics import Rectangle, Color, InstructionGroup
 from kivy.core.window import Window
 from robot_representation import RobotRepresentation
+from micro_task_representation import MuTaskRepresentation
 from display_object import DisplayObject
 
 
@@ -15,6 +16,9 @@ class Display(Widget):
     axis_y_marker_size = (8, 4)
     last_inside = BooleanProperty(False)
     objects = ListProperty([])
+    robots = ListProperty([])
+    tasks = ListProperty([])
+    mu_tasks = ListProperty([])
     selected_object = ObjectProperty(None)
     is_object_selected = BooleanProperty(False)
     dummy_object = DisplayObject('Dummy',name='Dummy',local_pos=(math.inf, math.inf), \
@@ -22,7 +26,6 @@ class Display(Widget):
                                                         default_size=(0, 0))
     def __init__(self, **kwargs):
         super(Display, self).__init__(**kwargs)
-
         self.rect_x_ig = InstructionGroup()
         self.rect_x_ig.add(Color(1,1,1))
         self.rect_x = Rectangle(size=(self.width,2), pos=(self.center_x - self.width/2, self.center_y-1))
@@ -53,19 +56,41 @@ class Display(Widget):
         self.bind(size=self._update_rect, pos=self._update_rect, axis_resolution=self._update_rect, axis_max_value=self._update_rect)
         Window.bind(mouse_pos=self.on_mouse_pos)
         self.coordinate_label = Label(text='0,0')
+
     
     def add_robot(self, new_robot):
         name_exists = any([new_robot.name == robot.name for robot in self.objects if robot.obj_type is 'Robot'])
         if not name_exists:
+            self.robots.append(new_robot)
             robot_representation = RobotRepresentation(new_robot, \
                                                         name=new_robot.name, \
                                                         local_pos=new_robot.position, \
                                                         z_pos = len(self.objects),\
                                                         default_size=(RobotRepresentation.default_width, RobotRepresentation.default_height))
-            # robot_representation.bind(robot=self.objects_robot_changed)
             self.add_display_object(robot_representation)
+
+    def add_task(self, new_task):
+        name_exists = any([new_task.name == task.name for task in self.objects if task.obj_type is 'Task'])
+        if not name_exists:
+            self.tasks.append(new_task)
+            for mu_task in new_task.mu_tasks:
+                self.mu_tasks.append(mu_task)
+                mu_task_representation = MuTaskRepresentation(name=new_task.name+','+mu_task.name, 
+                    task=new_task,
+                    mu_task=mu_task,
+                    local_pos=mu_task.position,
+                    z_pos = len(self.objects),
+                    default_size=(MuTaskRepresentation.default_width, MuTaskRepresentation.default_height))
+                self.add_display_object(mu_task_representation)
             
-        
+    def clear_display(self):
+        for obj in self.objects:
+            self.remove_widget(obj)
+        self.objects = []
+        self.robots.clear()
+        self.mu_tasks.clear()
+        self.tasks.clear()
+
     def add_display_object(self, new_object):
         self.objects.append(new_object)
         self.add_widget(new_object)
@@ -137,6 +162,9 @@ class Display(Widget):
                 self.selected_object = self.dummy_object
         
     def on_touch_move(self, value):
+        pos = value.pos
+        if not self.collide_point(*self.to_widget(*pos)):
+            return
         if self.is_object_selected:
             self.selected_object.move_canvas(value.pos)
 

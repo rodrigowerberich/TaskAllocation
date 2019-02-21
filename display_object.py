@@ -1,5 +1,5 @@
 from kivy.uix.widget import Widget
-from kivy.properties import NumericProperty, StringProperty, ReferenceListProperty, ListProperty
+from kivy.properties import NumericProperty, StringProperty, ReferenceListProperty, ListProperty, ObjectProperty
 
 class DisplayObject(Widget):
     name = StringProperty('')
@@ -9,6 +9,7 @@ class DisplayObject(Widget):
     local_pos = ReferenceListProperty(x_pos, y_pos)
     default_size = ListProperty([])
     z_pos = NumericProperty(0)
+    display_info_widget = ObjectProperty(None)
     def __init__(self, obj_type, **kwargs):
         super(DisplayObject, self).__init__(**kwargs)
         self.obj_type = obj_type

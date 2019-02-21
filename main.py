@@ -1,3 +1,6 @@
+from kivy.config import Config
+Config.set('graphics', 'minimum_width', 800)
+Config.set('graphics', 'minimum_height', 600)
 from kivy.app import App
 from task_planning_window import TaskPlanningWindow
 

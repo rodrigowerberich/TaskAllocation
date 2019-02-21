@@ -31,28 +31,26 @@ class DisplayMenu(BoxLayout):
     def __init__(self, **kwargs):
         super(DisplayMenu, self).__init__(**kwargs)
 
-    def display_objects_changed(self, instance, value):
-        print('value 1', value[-1], value)
-        self.rv.data.append({'text':str(value[-1].obj_type)+':'+str(value[-1].name), 'display_object':value[-1]})
-        print(self.rv.data)
+    def display_objects_changed(self, instance, value):   
+        if value == []:
+            self.rv.data = []
+        else:
+            self.rv.data.append({'text':str(value[-1].obj_type)+':'+str(value[-1].name), 'display_object':value[-1]})
 
     def on_object_selected(self, instance, value):
-        print('value 2', value)
         self.rv.select_view(str(value.obj_type)+':'+str(value.name))
         if value.obj_type != 'Dummy':
             self.display_object_show.display_object = value
 
     def on_is_object_selected(self, instance, value):
-        print('value 3', value)
         if value is False:
             self.rv.deselect_view()
             self.display_object_show.display_object = self.display_object_show.dummy
 
     def on_rv(self, instance, value):
-        print('value 4', value)
         value.bind(selected_value=self.selection_happened)
     
     def selection_happened(self, instance, value):
-        print('value 5', value)
+        # TODO Corrigir bug pois o rv dá algum bug na seleção quando existem elementos demais na sua lista
         self.object_menu_selected =  value
         self.display_object_show.display_object = value

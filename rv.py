@@ -61,10 +61,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
-        # if is_selected:
-        #     print("selection changed to {0}".format(rv.data[index]))
-        # else:
-        #     print("selection removed for {0}".format(rv.data[index]))
 
     def on_display_object(self, instance,  value):
         if self.old_display is not None:
@@ -81,7 +77,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def on_text(self, instance, value):
         if self.parent is not None:
             self.parent.parent.data[self.index]['text'] = value
-        print('on text', self, instance, value)
 
 class RV(RecycleView):
     controller = ObjectProperty(None)

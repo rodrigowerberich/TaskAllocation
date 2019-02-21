@@ -9,6 +9,7 @@ Builder.load_string('''
     pos_label: pos_label
     type_label: type_label
     name_label: name_label
+    box_layout: rest_layout
     # Draw a background to indicate selection
     canvas.before:
         Color:
@@ -61,15 +62,21 @@ Builder.load_string('''
         halign: 'left'
         pos:  root.ids.pos_label_title.pos[0]+root.ids.pos_label_title.width,  root.ids.type_label_title.pos[1]-self.height
         size_hint: 0.69, 0.1
+    BoxLayout:
+        id: rest_layout
+        pos: 0, root.ids.pos_label_title.pos[1]-self.height
+        size_hint: 1, 0.7
 ''')
 
 class DisplayObjectShow(RelativeLayout):
     dummy = DisplayObject('Unselected', local_pos = (0,0), default_size=(0,0), name='Unselected', z_pos=-1)
-    display_object=ObjectProperty(dummy)
+    display_object = ObjectProperty(dummy)
     old_display_object = None
     pos_label = ObjectProperty(None)
     name_label = ObjectProperty(None)
     type_label = ObjectProperty(None)
+    box_layout = ObjectProperty(None)
+    
     def on_display_object(self, instance, value):
         local_pos = value.local_pos
         local_pos = list(map(lambda x: round(x,2), local_pos))
@@ -78,8 +85,12 @@ class DisplayObjectShow(RelativeLayout):
         self.name_label.text = str(value.name)
         if self.old_display_object is not None:
             self.old_display_object.unbind(local_pos=self.location_update, name=self.name_update)
+            if self.old_display_object.display_info_widget is not None:
+                self.box_layout.remove_widget(self.old_display_object.display_info_widget)
         value.bind(local_pos=self.location_update, name=self.name_update)
         self.old_display_object = value
+        if self.display_object.display_info_widget is not None:
+            self.box_layout.add_widget(self.display_object.display_info_widget)
         
 
     def location_update(self, instance, value):
@@ -88,5 +99,4 @@ class DisplayObjectShow(RelativeLayout):
         self.pos_label.text = str(local_pos)
 
     def name_update(self, instance, value):
-        print(value)
         self.name_label.text = str(value)

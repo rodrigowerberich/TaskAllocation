@@ -3,12 +3,13 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from robot import Robot, RobotType
+from kivy.uix.dropdown import DropDown
+from robot import Robot
 from copy import deepcopy
 
 
 class CreateRobotPopup(Popup):
-    def __init__(self, display, robot_representation=None, **kwargs):
+    def __init__(self, display, robot_types, robot_representation=None, **kwargs):
         super(CreateRobotPopup, self).__init__(**kwargs)
         if robot_representation is None:
             self.robot = None
@@ -24,7 +25,7 @@ class CreateRobotPopup(Popup):
             suggestion_name_value = 1
             while any([str(suggestion_name_value) == robot.name for robot in self.display.objects if robot.obj_type is 'Robot']):
                 suggestion_name_value += 1
-            self.robot = Robot(str(suggestion_name_value), RobotType.a1, (0, 0))
+            self.robot = Robot(str(suggestion_name_value), robot_types[0], (0, 0))
         
         self.name_label = Label(text='Robot name:')
         self.name_input = TextInput(text=self.robot.name, multiline=False)
@@ -45,6 +46,20 @@ class CreateRobotPopup(Popup):
         self.robot_position_layout.add_widget(self.robot_position_label)
         self.robot_position_layout.add_widget(self.robot_position_input_x)
         self.robot_position_layout.add_widget(self.robot_position_input_y)
+
+        self.dropdown_layout = BoxLayout()
+        self.dropdown_label = Label(text='Robot type:')
+        self.dropdown = DropDown()
+        for robot_type in robot_types:
+            btn = Button(text=robot_type, size_hint_y=None, height=44)
+            btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
+            self.dropdown.add_widget(btn)
+
+        self.mainbutton = Button(text=str(self.robot.type))
+        self.mainbutton.bind(on_release=self.dropdown.open)
+        self.dropdown.bind(on_select=self.dropdown_selected)
+        self.dropdown_layout.add_widget(self.dropdown_label)
+        self.dropdown_layout.add_widget(self.mainbutton)
         
         self.close_button = Button(text='Close')
         self.close_button.bind(on_press=self.popup_close_button_callback)
@@ -60,6 +75,7 @@ class CreateRobotPopup(Popup):
         self.box_layout = BoxLayout(orientation='vertical')
         self.box_layout.add_widget(self.name_layout)
         self.box_layout.add_widget(self.robot_position_layout)
+        self.box_layout.add_widget(self.dropdown_layout)
         self.box_layout.add_widget(self.end_layout)
 
         self.content = self.box_layout
@@ -88,8 +104,8 @@ class CreateRobotPopup(Popup):
             else:
                 instance.text = str(self.robot.position[0])
         except ValueError:
-            instance.text = str(self.robot.position[0])
-            
+            instance.text = str(self.robot.position[0])    
+    
     def robot_position_input_y_on_focus(self, instance, value):
         try:
             new_y_value = float(instance.text)
@@ -99,3 +115,7 @@ class CreateRobotPopup(Popup):
                 instance.text = str(self.robot.position[1])
         except ValueError:
             instance.text = str(self.robot.position[1])
+
+    def dropdown_selected(self, instance, value):
+        setattr(self.mainbutton, 'text', value)
+        self.robot.type = value
